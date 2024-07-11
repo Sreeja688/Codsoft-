@@ -1,0 +1,126 @@
+<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Quiz Maker</title>
+    <style type="text/css">
+        body {
+            background-color: pink;
+	    background-image: url("images");
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question input, .question textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .answers input {
+            margin-right: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Online Quiz Maker</h1>
+        <div id="quiz-form">
+            <h2>Create Your Quiz</h2>
+            <div id="questions"></div>
+            <button class="btn" onclick="addQuestion()">Add Question</button>
+            <button class="btn" onclick="generateQuiz()">Generate Quiz</button>
+        </div>
+        <div id="quiz" style="display:none;">
+            <h2>Take the Quiz</h2>
+            <form id="quiz-questions"></form>
+            <button class="btn" onclick="submitQuiz()">Submit Quiz</button>
+            <div id="result"></div>
+        </div>
+    </div>
+    <script>
+        let questionCount = 0;
+
+        function addQuestion() {
+            questionCount++;
+            const questionsDiv = document.getElementById('questions');
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question');
+            questionDiv.innerHTML = `
+                <h3>Question ${questionCount}</h3>
+                <textarea placeholder="Enter your question here"></textarea>
+                <div class="answers">
+                    <input type="text" placeholder="Answer 1">
+                    <input type="text" placeholder="Answer 2">
+                    <input type="text" placeholder="Answer 3">
+                    <input type="text" placeholder="Answer 4">
+                </div>
+                <input type="text" placeholder="Correct answer (1-4)">
+            `;
+            questionsDiv.appendChild(questionDiv);
+        }
+
+        function generateQuiz() {
+            const questions = document.querySelectorAll('.question');
+            const quizDiv = document.getElementById('quiz-questions');
+            quizDiv.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const questionText = question.querySelector('textarea').value;
+                const answers = question.querySelectorAll('.answers input');
+                const correctAnswer = question.querySelector('input[type=text]:last-child').value;
+
+                const quizQuestionDiv = document.createElement('div');
+                quizQuestionDiv.classList.add('question');
+                quizQuestionDiv.innerHTML = `
+                    <h3>Question ${index + 1}</h3>
+                    <p>${questionText}</p>
+                    ${Array.from(answers).map((answer, i) => `
+                        <label>
+                            <input type="radio" name="question${index + 1}" value="${i + 1}"> ${answer.value}
+                        </label>
+                    `).join('')}
+                    <input type="hidden" name="correct${index + 1}" value="${correctAnswer}">
+                `;
+                quizDiv.appendChild(quizQuestionDiv);
+            });
+
+            document.getElementById('quiz-form').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+        }
+
+        function submitQuiz() {
+            const questions = document.querySelectorAll('#quiz-questions .question');
+            let score = 0;
+
+            questions.forEach((question, index) => {
+                const selectedAnswer = question.querySelector(`input[name="question${index + 1}"]:checked`);
+                const correctAnswer = question.querySelector(`input[name="correct${index + 1}"]`).value;
+
+                if (selectedAnswer && selectedAnswer.value === correctAnswer) {
+                    score++;
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h3>Your Score: ${score} / ${questions.length}</h3>`;
+        }
+    </script>
+</body>
+</html>
